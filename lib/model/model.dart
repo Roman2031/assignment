@@ -20,6 +20,6 @@
 }
 
  class Classes {
-  String label;
-  Classes(this.label);
+  String classType;
+  Classes(this.classType);
 }

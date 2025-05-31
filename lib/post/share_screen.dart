@@ -9,6 +9,7 @@ import 'package:assignment/model/model.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:month_year_picker/month_year_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_rating/flutter_rating.dart';
 
 class ShareScreen extends StatefulWidget {
   const ShareScreen({super.key});
@@ -32,6 +33,9 @@ class _ShareScreenState extends State<ShareScreen> {
   Airline? selectedAirline;
   Classes? selectedClass;  
   DateTime? _selected;
+
+  double rating = 0;
+  int starCount = 5;
 
   @override
   Widget build(BuildContext context) {
@@ -208,7 +212,7 @@ selectedMonthDateController = TextEditingController(text: _selected == null ? ''
                     classItems.map<DropdownMenuEntry<Classes>>((Classes menu) {
                   return DropdownMenuEntry<Classes>(
                       value: menu,
-                      label: menu.label);
+                      label: menu.classType);
                 }).toList(),
               ),
                const SizedBox(
@@ -222,7 +226,7 @@ selectedMonthDateController = TextEditingController(text: _selected == null ? ''
                 child: TextField(
                   controller: postTextController,
                   keyboardType: TextInputType.multiline,
-                  maxLines: 5,
+                  maxLines: 3,
                   decoration: InputDecoration(
                       border: OutlineInputBorder(), hintText: 'Write your message'),
                 ),
@@ -244,30 +248,70 @@ selectedMonthDateController = TextEditingController(text: _selected == null ? ''
             const SizedBox(
               height: 10,
             ),
+             Container(
+              width: width,
+               child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                 children: [
+                  Text('Rating',style: TextStyle(color: Colors.grey)),
+                  StarRating(
+                    size: 25.0,
+                    rating: rating,
+                    color: Colors.orange,
+                    borderColor: Colors.grey,
+                    allowHalfRating: false,
+                    starCount: starCount,
+                    onRatingChanged: (rating) => setState(() {
+                      this.rating = rating;
+                    }),),                           
+                 ],
+               ),
+             ),
          const SizedBox(
               height: 10,
             ),
-            Container(
-              width: width,
-              child: MaterialButton(
-                  color: Colors.blue,
-                  minWidth: double.infinity,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  height: 50,
-                  onPressed: () async {
-                    for (int i = 0; i < images.length; i++) {
-                      String url = await uploadFile(images[i]);
-                      downloadUrls.add(url);
-              
-                      if (i == images.length - 1) {
-                        storeEntry(downloadUrls, postTextController.text);
-                      }
-                    }
-                  },
-                  child: Text("Share Now"),
-               
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: EdgeInsets.only(left: 8),
+                  width: 175,
+                  child: MaterialButton(
+                      color: Colors.black,
+                      minWidth: double.infinity,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                      height: 50,
+                      onPressed: () async {
+                        for (int i = 0; i < images.length; i++) {
+                          String url = await uploadFile(images[i]);
+                          downloadUrls.add(url);
+                  
+                          if (i == images.length - 1) {
+                            storeEntry(downloadUrls, postTextController.text,
+                            selectedDepartureAirport!.departureAirportName,
+                            selectedDepartureAirport!.departureAirportAddress,
+                            selectedDepartureAirport!.departureAirportShortCode,
+                            selectedArrivalAirport!.arrivalAirportName,
+                            selectedArrivalAirport!.arrivalAirportAddress,
+                            selectedArrivalAirport!.arrivalAirportShortCode,
+                            selectedAirline!.airlineName,
+                            selectedAirline!.airlineCountry,
+                            selectedAirline!.airlineShortCode,
+                            selectedClass!.classType,
+                            selectedMonthDateController!.text,
+                            rating.toString()
+                            );
+                          }
+                        }
+                      },
+                      child: Text("Share Now",style: TextStyle(color: Colors.white),),
+                   
+                  ),
+                ),
+              ],
             )
           
          ]),
@@ -327,10 +371,37 @@ selectedMonthDateController = TextEditingController(text: _selected == null ? ''
     return url;
   }
 
-  storeEntry(List<String> imageUrls, String name) {
+  storeEntry(List<String> imageUrls, 
+  String postText,
+  String departureAirportName,
+  String departureAirportAddress,
+  String departureAirportShortCode,
+  String arrivalAirportName,
+  String arrivalAirportAddress,
+  String arrivalAirportShortCode,
+  String airlineName,
+  String airlineCountry,
+  String airlineShortCode,
+  String className,
+  String travelDate,
+  String rating
+  ) {
     FirebaseFirestore.instance
         .collection('post')
-        .add({'image': imageUrls, 'name': name}).then((value) {
+        .add({'image': imageUrls, 'post': postText,
+        'departureAirportName': departureAirportName,
+        'departureAirportAddress': departureAirportAddress,
+        'departureAirportShortCode': departureAirportShortCode,
+        'arrivalAirportName': arrivalAirportName,
+        'arrivalAirportAddress': arrivalAirportAddress,
+        'arrivalAirportShortCode': arrivalAirportShortCode,
+        'airlineName': airlineName,
+        'airlineCountry': airlineCountry,
+        'airlineShortCode': airlineShortCode,
+        'className': className,
+        'travelDate': travelDate,
+        'rating': rating
+        }).then((value) {
       Get.snackbar('Success', 'Data is stored successfully');
     });
   }  
@@ -371,7 +442,7 @@ List<Airline> airlineItems = [
 ];
 
 List<Classes> classItems = [
-    Classes(''),
+  Classes(''),
   Classes('Any'),
   Classes('Business'),
   Classes('first'),
