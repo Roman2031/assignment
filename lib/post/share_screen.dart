@@ -6,6 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:assignment/model/model.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:month_year_picker/month_year_picker.dart';
+import 'package:intl/intl.dart';
 
 class ShareScreen extends StatefulWidget {
   const ShareScreen({super.key});
@@ -16,7 +19,8 @@ class ShareScreen extends StatefulWidget {
 
 class _ShareScreenState extends State<ShareScreen> {
   List<File> images = [];   
-  TextEditingController nameController = TextEditingController();
+  TextEditingController postTextController = TextEditingController();
+  TextEditingController? selectedMonthDateController;
   //double width = MediaQuery.of(context).size.width - 16.0;
   final TextEditingController departureController = TextEditingController();
   final TextEditingController arrivalController = TextEditingController();
@@ -26,12 +30,13 @@ class _ShareScreenState extends State<ShareScreen> {
   DepartureAirport? selectedDepartureAirport;
   ArrivalAirport? selectedArrivalAirport;
   Airline? selectedAirline;
-  Classes? selectedClass;
+  Classes? selectedClass;  
+  DateTime? _selected;
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width - 16.0;
-
+selectedMonthDateController = TextEditingController(text: _selected == null ? '' : DateFormat().add_yM().format(_selected!));
     return Scaffold(
       appBar: AppBar(title: Text("Upload multiple files")),
       body: Container(
@@ -215,12 +220,46 @@ class _ShareScreenState extends State<ShareScreen> {
             Container(
               width: width,
                 child: TextField(
-                  controller: nameController,
+                  controller: postTextController,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: 5,
                   decoration: InputDecoration(
-                      border: OutlineInputBorder(), hintText: 'Your name'),
+                      border: OutlineInputBorder(), hintText: 'Write your message'),
                 ),
               ),            
             const SizedBox(
+              height: 10,
+            ),
+        //     Center(
+        // child: Column(
+        //   mainAxisAlignment: MainAxisAlignment.center,
+        //   children: [
+        //     if (_selected == null)
+        //       const Text('No month year selected.')
+        //     else
+        //       Text(DateFormat().add_yM().format(_selected!)),
+        //     TextButton(
+        //       child: const Text('DEFAULT LOCALE'),
+        //       onPressed: () async => _onPressed(context: context),
+        //     ),
+        //   ],
+        // ),
+        // ),
+        Container(
+              width: width,
+                child: TextField(
+                  //initialValue: DateFormat().add_yM().format(_selected!),
+                  readOnly: true,
+                  controller: selectedMonthDateController,
+                  decoration: InputDecoration(
+                    suffixIcon: IconButton(onPressed:() async => _onPressed(context: context), icon: Icon(Icons.calendar_month_outlined)),
+                      border: OutlineInputBorder(), hintText: 'Travel Date'),
+                ),
+              ),            
+            const SizedBox(
+              height: 10,
+            ),
+         const SizedBox(
               height: 10,
             ),
             Container(
@@ -237,11 +276,11 @@ class _ShareScreenState extends State<ShareScreen> {
                       downloadUrls.add(url);
               
                       if (i == images.length - 1) {
-                        storeEntry(downloadUrls, nameController.text);
+                        storeEntry(downloadUrls, postTextController.text);
                       }
                     }
                   },
-                  child: Text("Upload"),
+                  child: Text("Share Now"),
                
               ),
             )
@@ -252,6 +291,8 @@ class _ShareScreenState extends State<ShareScreen> {
     
     );
   }
+
+  
 
   List<String> downloadUrls = [];
 
@@ -267,7 +308,27 @@ class _ShareScreenState extends State<ShareScreen> {
 
       setState(() {});
     }
+  }  
+
+  Future<void> _onPressed({
+    required BuildContext context,
+    String? locale,
+  }) async {
+    final localeObj = locale != null ? Locale(locale) : null;
+    final selected = await showMonthYearPicker(
+      context: context,
+      initialDate: _selected ?? DateTime.now(),
+      firstDate: DateTime(2019),
+      lastDate: DateTime(2030),
+      locale: localeObj,
+    );
+    if (selected != null) {
+      setState(() {
+        _selected = selected;
+      });
+    }
   }
+}
 
   Future<String> uploadFile(File file) async {
     final metaData = SettableMetadata(contentType: 'image/jpeg');
@@ -332,5 +393,4 @@ List<Classes> classItems = [
   Classes('Premium Economy'),
   Classes('Economy')
 ];
-}
 
