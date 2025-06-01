@@ -16,9 +16,12 @@ class _PostListScreenState extends State<PostListScreen>  {
 var collection =  FirebaseFirestore.instance.collection("post");
 late List<Map<String, dynamic>> allPosts;
 bool isloaded = false;
+bool likeButtonTaggle = false;
 
 double rating = 0;
 int starCount = 5;
+int totalLike = 0;
+int  totalComment = 0;
 
  @override
   void initState() {
@@ -38,9 +41,6 @@ int starCount = 5;
             child: isloaded?ListView.builder(
               itemCount: allPosts.length,
               itemBuilder: (context,index){
-                print("0 image url: " + allPosts[index]["image"][0]);
-                print("1 image url: " + allPosts[index]["image"][1]);
-                print("total image: " + allPosts[index]["image"].length.toString());
                 return Padding(padding: EdgeInsetsGeometry.all(8),
                 child: ListTile(
                   tileColor: Colors.white,
@@ -180,7 +180,7 @@ int starCount = 5;
                       Column(
                             children: [                              
                               Row(
-                                children: <Widget>[   
+                                children:[   
                                   for(int i = 0; i < allPosts[index]["image"].length; i++)                      
                                   Padding(
                                     padding: const EdgeInsets.only(left: 5),
@@ -196,6 +196,47 @@ int starCount = 5;
                               
                             ],
                           ), 
+                           Row(children: [
+                        Flexible(
+                           child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                                child:Row(
+                                  children: [                                    
+                                    Text(totalLike.toString() + " Like"),
+                                    Padding(
+                                      padding: const EdgeInsets.all(10),
+                                      child: Text("|",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18)),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left:5),
+                                      child: Text(totalComment.toString()+" Comment"),
+                                    ),
+                                  ],
+                                ),
+                                ),                        
+                            ),                                                                              
+                      ],),
+                           Row(children: [
+                        Flexible(
+                           child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                                child:Row(
+                                  children: [
+                                    IconButton(onPressed: clicklikeIcon, icon: likeButtonTaggle == false ? Icon(Icons.thumb_up_off_alt_outlined): Icon(Icons.thumb_up_alt_sharp)),
+                                    GestureDetector(
+                                      onTap: () {clicklikeIcon();},
+                                      child: Text("Like")),
+                                  ],
+                                ),
+                                ),                        
+                            ),  
+                            Row(
+                                  children: [
+                                    IconButton(onPressed: clicklikeIcon, icon: Icon(Icons.screen_share_outlined)),
+                                    Text("Share"),
+                                  ],
+                                ),                                                                               
+                      ],),
                       ],
                     ),
                   ),
@@ -225,7 +266,23 @@ int starCount = 5;
 
     print(allPosts);
 }
+
+clicklikeIcon() async{
+setState(() {
+  if (!likeButtonTaggle) {
+    likeButtonTaggle = true;
+    totalLike = 1;
+    return;
   }
+  if (likeButtonTaggle) {
+    likeButtonTaggle = false;
+    totalLike = 0;
+  }
+    });
+  }
+  }
+
+  
 
   
   
