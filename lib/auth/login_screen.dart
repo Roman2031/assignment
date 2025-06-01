@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:assignment/auth/auth_service.dart';
 import 'package:assignment/auth/signup_screen.dart';
 import 'package:assignment/home_screen.dart';
+import 'package:assignment/post/post_list.dart';
 import 'package:assignment/post/share_screen.dart';
 import 'package:assignment/widgets/button.dart';
 import 'package:assignment/widgets/textfield.dart';
@@ -61,6 +62,10 @@ class _LoginScreenState extends State<LoginScreen> {
               label: "share",
               onPressed: () => goToShare(context),
             ),
+             CustomButton(
+              label: "share List",
+              onPressed: () => goToShareList(context),
+            ),
             Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               const Text("Already have an account? "),
               InkWell(
@@ -90,6 +95,11 @@ class _LoginScreenState extends State<LoginScreen> {
         context,
         MaterialPageRoute(builder: (context) => const ShareScreen()),
       );    
+
+      goToShareList(BuildContext context) => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const PostListScreen()),
+      );  
 
   _login() async {
     final user =
