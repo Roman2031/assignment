@@ -19,7 +19,8 @@ class ShareScreen extends StatefulWidget {
 }
 
 class _ShareScreenState extends State<ShareScreen> {
-  List<File> images = [];   
+  var collection = FirebaseFirestore.instance.collection("post");
+  List<File> images = [];
   TextEditingController postTextController = TextEditingController();
   TextEditingController? selectedMonthDateController;
   //double width = MediaQuery.of(context).size.width - 16.0;
@@ -31,7 +32,7 @@ class _ShareScreenState extends State<ShareScreen> {
   DepartureAirport? selectedDepartureAirport;
   ArrivalAirport? selectedArrivalAirport;
   Airline? selectedAirline;
-  Classes? selectedClass;  
+  Classes? selectedClass;
   DateTime? _selected;
 
   double rating = 0;
@@ -40,77 +41,68 @@ class _ShareScreenState extends State<ShareScreen> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width - 16.0;
-selectedMonthDateController = TextEditingController(text: _selected == null ? '' : DateFormat().add_yM().format(_selected!));
+    selectedMonthDateController = TextEditingController(
+      text: _selected == null ? '' : DateFormat().add_yM().format(_selected!),
+    );
     return Scaffold(
       appBar: AppBar(title: Text("Upload multiple files")),
       body: Container(
-       width: double.infinity,
-       child: SingleChildScrollView(
-          child: Column(children: [
-            
-           SizedBox(
-             height: 5,
-            ),
-            InkWell(
-              onTap: () {
-                getMultipImage();
-              },
-              child: Container(
+        width: double.infinity,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(height: 5),
+              InkWell(
+                onTap: () {
+                  getMultipImage();
+                },
+                child: Container(
                   width: 200,
                   height: 100,
                   decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.circular(8)),
+                    border: Border.all(color: Colors.black),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   child: const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.upload_file,
-                          size: 50,
-                        ),
-                        Text("Select Your Image Here")
+                        Icon(Icons.upload_file, size: 50),
+                        Text("Select Your Image Here"),
                       ],
                     ),
-                  )),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Container(
-              //width: Get.width,
-              height: 150,
-              child: images.length == 0
-                  ? Center(
-                      child: Text("No Images found"),
-                    )
-                  : Padding(
-                    padding: EdgeInsetsGeometry.only(left: 10),
-                    child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (ctx, i) {
-                          return Container(
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                //width: Get.width,
+                height: 150,
+                child: images.length == 0
+                    ? Center(child: Text("No Images found"))
+                    : Padding(
+                        padding: EdgeInsetsGeometry.only(left: 10),
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (ctx, i) {
+                            return Container(
                               width: 100,
                               margin: EdgeInsets.only(right: 10),
                               height: 80,
                               decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.transparent),
-                                  borderRadius: BorderRadius.circular(8)),
-                              child: Image.file(
-                                images[i],
-                                fit: BoxFit.cover,
-                              ),                            
-                              );
-                        },
-                        itemCount: images.length,
+                                border: Border.all(color: Colors.transparent),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Image.file(images[i], fit: BoxFit.cover),
+                            );
+                          },
+                          itemCount: images.length,
+                        ),
                       ),
-                  ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            DropdownMenu<DepartureAirport>(
-              width: width,
+              ),
+              const SizedBox(height: 20),
+              DropdownMenu<DepartureAirport>(
+                width: width,
                 initialSelection: departureAirportItems.first,
                 controller: departureController,
                 requestFocusOnTap: true,
@@ -120,26 +112,37 @@ selectedMonthDateController = TextEditingController(text: _selected == null ? ''
                 onSelected: (DepartureAirport? menu) {
                   selectedDepartureAirport = menu;
                 },
-                dropdownMenuEntries:
-                    departureAirportItems.map<DropdownMenuEntry<DepartureAirport>>((DepartureAirport menu) {
-                  return DropdownMenuEntry<DepartureAirport>(
-                      value: menu,
-                      labelWidget: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                        Text(menu.departureAirportName,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16)),
-                        Text(menu.departureAirportAddress,style: TextStyle(fontSize: 13))
-                      ],),
-                      trailingIcon: Text(menu.departureAirportShortCode),
-                      label: menu.departureAirportName
+                dropdownMenuEntries: departureAirportItems
+                    .map<DropdownMenuEntry<DepartureAirport>>((
+                      DepartureAirport menu,
+                    ) {
+                      return DropdownMenuEntry<DepartureAirport>(
+                        value: menu,
+                        labelWidget: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              menu.departureAirportName,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            Text(
+                              menu.departureAirportAddress,
+                              style: TextStyle(fontSize: 13),
+                            ),
+                          ],
+                        ),
+                        trailingIcon: Text(menu.departureAirportShortCode),
+                        label: menu.departureAirportName,
                       );
-                }).toList(),
+                    })
+                    .toList(),
               ),
-               const SizedBox(
-              height: 10,
-            ),
+              const SizedBox(height: 10),
               DropdownMenu<ArrivalAirport>(
-              width: width,
+                width: width,
                 initialSelection: arrivalAirportItems.first,
                 controller: arrivalController,
                 requestFocusOnTap: true,
@@ -149,25 +152,37 @@ selectedMonthDateController = TextEditingController(text: _selected == null ? ''
                 onSelected: (ArrivalAirport? menu) {
                   selectedArrivalAirport = menu;
                 },
-                dropdownMenuEntries:
-                    arrivalAirportItems.map<DropdownMenuEntry<ArrivalAirport>>((ArrivalAirport menu) {
-                  return DropdownMenuEntry<ArrivalAirport>(
-                      value: menu,
-                      labelWidget: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                        Text(menu.arrivalAirportName,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16)),
-                        Text(menu.arrivalAirportAddress,style: TextStyle(fontSize: 13))
-                      ],),
-                      trailingIcon: Text(menu.arrivalAirportShortCode),
-                      label: menu.arrivalAirportName);
-                }).toList(),
+                dropdownMenuEntries: arrivalAirportItems
+                    .map<DropdownMenuEntry<ArrivalAirport>>((
+                      ArrivalAirport menu,
+                    ) {
+                      return DropdownMenuEntry<ArrivalAirport>(
+                        value: menu,
+                        labelWidget: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              menu.arrivalAirportName,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            Text(
+                              menu.arrivalAirportAddress,
+                              style: TextStyle(fontSize: 13),
+                            ),
+                          ],
+                        ),
+                        trailingIcon: Text(menu.arrivalAirportShortCode),
+                        label: menu.arrivalAirportName,
+                      );
+                    })
+                    .toList(),
               ),
-               const SizedBox(
-              height: 10,
-            ),
-            DropdownMenu<Airline>(
-              width: width,
+              const SizedBox(height: 10),
+              DropdownMenu<Airline>(
+                width: width,
                 initialSelection: airlineItems.first,
                 controller: airlineController,
                 requestFocusOnTap: true,
@@ -177,28 +192,36 @@ selectedMonthDateController = TextEditingController(text: _selected == null ? ''
                 onSelected: (Airline? menu) {
                   selectedAirline = menu;
                 },
-                dropdownMenuEntries:
-                    airlineItems.map<DropdownMenuEntry<Airline>>((Airline menu) {
-                  return DropdownMenuEntry<Airline>(
-                      value: menu,  
-                      labelWidget: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                        Text(menu.airlineName,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16)),
-                        Text(menu.airlineCountry,style: TextStyle(fontSize: 13))
-                      ],),
-                       trailingIcon: Text(menu.airlineShortCode),                    
-                      label: menu.airlineName);
-                }).toList(),
+                dropdownMenuEntries: airlineItems
+                    .map<DropdownMenuEntry<Airline>>((Airline menu) {
+                      return DropdownMenuEntry<Airline>(
+                        value: menu,
+                        labelWidget: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              menu.airlineName,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            Text(
+                              menu.airlineCountry,
+                              style: TextStyle(fontSize: 13),
+                            ),
+                          ],
+                        ),
+                        trailingIcon: Text(menu.airlineShortCode),
+                        label: menu.airlineName,
+                      );
+                    })
+                    .toList(),
               ),
-               const SizedBox(
-              height: 10,
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            DropdownMenu<Classes>(
-              width: width,
+              const SizedBox(height: 10),
+              const SizedBox(height: 10),
+              DropdownMenu<Classes>(
+                width: width,
                 initialSelection: classItems.first,
                 controller: classController,
                 requestFocusOnTap: true,
@@ -208,120 +231,124 @@ selectedMonthDateController = TextEditingController(text: _selected == null ? ''
                 onSelected: (Classes? menu) {
                   selectedClass = menu;
                 },
-                dropdownMenuEntries:
-                    classItems.map<DropdownMenuEntry<Classes>>((Classes menu) {
-                  return DropdownMenuEntry<Classes>(
+                dropdownMenuEntries: classItems.map<DropdownMenuEntry<Classes>>(
+                  (Classes menu) {
+                    return DropdownMenuEntry<Classes>(
                       value: menu,
-                      label: menu.classType);
-                }).toList(),
+                      label: menu.classType,
+                    );
+                  },
+                ).toList(),
               ),
-               const SizedBox(
-              height: 10,
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Container(
-              width: width,
+              const SizedBox(height: 10),
+              const SizedBox(height: 10),
+              Container(
+                width: width,
                 child: TextField(
                   controller: postTextController,
                   keyboardType: TextInputType.multiline,
                   maxLines: 3,
                   decoration: InputDecoration(
-                      border: OutlineInputBorder(), hintText: 'Write your message'),
+                    border: OutlineInputBorder(),
+                    hintText: 'Write your message',
+                  ),
                 ),
-              ),            
-            const SizedBox(
-              height: 10,
-            ),
-        Container(
-              width: width,
+              ),
+              const SizedBox(height: 10),
+              Container(
+                width: width,
                 child: TextField(
                   //initialValue: DateFormat().add_yM().format(_selected!),
                   readOnly: true,
                   controller: selectedMonthDateController,
                   decoration: InputDecoration(
-                    suffixIcon: IconButton(onPressed:() async => _onPressed(context: context), icon: Icon(Icons.calendar_month_outlined)),
-                      border: OutlineInputBorder(), hintText: 'Travel Date'),
+                    suffixIcon: IconButton(
+                      onPressed: () async => _onPressed(context: context),
+                      icon: Icon(Icons.calendar_month_outlined),
+                    ),
+                    border: OutlineInputBorder(),
+                    hintText: 'Travel Date',
+                  ),
                 ),
-              ),            
-            const SizedBox(
-              height: 10,
-            ),
-             Container(
-              width: width,
-               child: Row(
+              ),
+              const SizedBox(height: 10),
+              Container(
+                width: width,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Rating', style: TextStyle(color: Colors.grey)),
+                    StarRating(
+                      size: 25.0,
+                      rating: rating,
+                      color: Colors.orange,
+                      borderColor: Colors.grey,
+                      allowHalfRating: false,
+                      starCount: starCount,
+                      onRatingChanged: (rating) => setState(() {
+                        this.rating = rating;
+                      }),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                 children: [
-                  Text('Rating',style: TextStyle(color: Colors.grey)),
-                  StarRating(
-                    size: 25.0,
-                    rating: rating,
-                    color: Colors.orange,
-                    borderColor: Colors.grey,
-                    allowHalfRating: false,
-                    starCount: starCount,
-                    onRatingChanged: (rating) => setState(() {
-                      this.rating = rating;
-                    }),),                           
-                 ],
-               ),
-             ),
-         const SizedBox(
-              height: 10,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: EdgeInsets.only(left: 8),
-                  width: 175,
-                  child: MaterialButton(
+                children: [
+                  Container(
+                    padding: EdgeInsets.only(left: 8),
+                    width: 175,
+                    child: MaterialButton(
                       color: Colors.black,
                       minWidth: double.infinity,
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       height: 50,
                       onPressed: () async {
                         for (int i = 0; i < images.length; i++) {
                           String url = await uploadFile(images[i]);
                           downloadUrls.add(url);
-                  
+                          String documentId = await getDocumentId();
                           if (i == images.length - 1) {
-                            storeEntry(downloadUrls, postTextController.text,
-                            selectedDepartureAirport!.departureAirportName,
-                            selectedDepartureAirport!.departureAirportAddress,
-                            selectedDepartureAirport!.departureAirportShortCode,
-                            selectedArrivalAirport!.arrivalAirportName,
-                            selectedArrivalAirport!.arrivalAirportAddress,
-                            selectedArrivalAirport!.arrivalAirportShortCode,
-                            selectedAirline!.airlineName,
-                            selectedAirline!.airlineCountry,
-                            selectedAirline!.airlineShortCode,
-                            selectedClass!.classType,
-                            selectedMonthDateController!.text,
-                            rating.toString()
+                            storeEntry(
+                              documentId,
+                              downloadUrls,
+                              postTextController.text,
+                              selectedDepartureAirport!.departureAirportName,
+                              selectedDepartureAirport!.departureAirportAddress,
+                              selectedDepartureAirport!
+                                  .departureAirportShortCode,
+                              selectedArrivalAirport!.arrivalAirportName,
+                              selectedArrivalAirport!.arrivalAirportAddress,
+                              selectedArrivalAirport!.arrivalAirportShortCode,
+                              selectedAirline!.airlineName,
+                              selectedAirline!.airlineCountry,
+                              selectedAirline!.airlineShortCode,
+                              selectedClass!.classType,
+                              selectedMonthDateController!.text,
+                              rating.toString(),
                             );
                           }
                         }
                       },
-                      child: Text("Share Now",style: TextStyle(color: Colors.white),),
-                   
+                      child: Text(
+                        "Share Now",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
                   ),
-                ),
-              ],
-            )
-          
-         ]),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-    
     );
   }
-
-  
 
   List<String> downloadUrls = [];
 
@@ -337,7 +364,7 @@ selectedMonthDateController = TextEditingController(text: _selected == null ? ''
 
       setState(() {});
     }
-  }  
+  }
 
   Future<void> _onPressed({
     required BuildContext context,
@@ -357,21 +384,31 @@ selectedMonthDateController = TextEditingController(text: _selected == null ? ''
       });
     }
   }
+
+   Future<String> getDocumentId() async {
+        AggregateQuerySnapshot query = await collection.count().get();
+        if(query.count != null || query.count != 0)
+        return (query.count! + 1).toString();
+        else
+        return '1';
+      }
+
+Future<String> uploadFile(File file) async {
+  final metaData = SettableMetadata(contentType: 'image/jpeg');
+  final storageRef = FirebaseStorage.instance.ref();
+  Reference ref = storageRef.child(
+    'pictures/${DateTime.now().microsecondsSinceEpoch}.jpg',
+  );
+  final uploadTask = ref.putFile(file, metaData);
+
+  final taskSnapshot = await uploadTask.whenComplete(() => null);
+  String url = await taskSnapshot.ref.getDownloadURL();
+  return url;
 }
 
-  Future<String> uploadFile(File file) async {
-    final metaData = SettableMetadata(contentType: 'image/jpeg');
-    final storageRef = FirebaseStorage.instance.ref();
-    Reference ref = storageRef
-        .child('pictures/${DateTime.now().microsecondsSinceEpoch}.jpg');
-    final uploadTask = ref.putFile(file, metaData);
-
-    final taskSnapshot = await uploadTask.whenComplete(() => null);
-    String url = await taskSnapshot.ref.getDownloadURL();
-    return url;
-  }
-
-  storeEntry(List<String> imageUrls, 
+storeEntry(
+  String documentId,
+  List<String> imageUrls,
   String postText,
   String departureAirportName,
   String departureAirportAddress,
@@ -384,11 +421,14 @@ selectedMonthDateController = TextEditingController(text: _selected == null ? ''
   String airlineShortCode,
   String className,
   String travelDate,
-  String rating
-  ) {
-    FirebaseFirestore.instance
-        .collection('post')
-        .add({'image': imageUrls, 'post': postText,
+  String rating,
+) {
+print('document id '+ documentId);
+  FirebaseFirestore.instance
+      .collection('post').doc(documentId)
+      .set({
+        'image': imageUrls,
+        'post': postText,
         'departureAirportName': departureAirportName,
         'departureAirportAddress': departureAirportAddress,
         'departureAirportShortCode': departureAirportShortCode,
@@ -400,45 +440,80 @@ selectedMonthDateController = TextEditingController(text: _selected == null ? ''
         'airlineShortCode': airlineShortCode,
         'className': className,
         'travelDate': travelDate,
-        'rating': rating
-        }).then((value) {
-      Get.snackbar('Success', 'Data is stored successfully');
-    });
-  }  
- 
+        'rating': rating,
+      })
+      .then((value) {
+        Get.snackbar('Success', 'Data is stored successfully');
+      });
+}
+
 List<DepartureAirport> departureAirportItems = [
-  DepartureAirport('','',''),
-  DepartureAirport('Chittagong, Bangladesh','Shah Amanat International Airport','CGP'),
-  DepartureAirport('Ishurdi Bangladesh','Ishurdi Airport','IRDF'),
-  DepartureAirport('Jessor, Bangladesh','Jessor Airport','JSR'),
-  DepartureAirport('Rajshahi, Bangladesh','Rajshahi, Bangladesh','RJH'),
-  DepartureAirport('Saidpur, Bangladesh','Saidpur Airport','SPD'),
-  DepartureAirport('Sylhet Osmani, Bangladesh','Osmany International Airport','ZYL'),
-  DepartureAirport('Dhaka, Bangladesh','Hazrat Shahjalal International Airport','DAC'),  
-  DepartureAirport('Coxs Bazar, Bangladesh','Cox''s Bazar Airport','CXB'),
-  DepartureAirport('Barisal, Bangladesh','Barisal Airport','BZL')
+  DepartureAirport('', '', ''),
+  DepartureAirport(
+    'Chittagong, Bangladesh',
+    'Shah Amanat International Airport',
+    'CGP',
+  ),
+  DepartureAirport('Ishurdi Bangladesh', 'Ishurdi Airport', 'IRDF'),
+  DepartureAirport('Jessor, Bangladesh', 'Jessor Airport', 'JSR'),
+  DepartureAirport('Rajshahi, Bangladesh', 'Rajshahi, Bangladesh', 'RJH'),
+  DepartureAirport('Saidpur, Bangladesh', 'Saidpur Airport', 'SPD'),
+  DepartureAirport(
+    'Sylhet Osmani, Bangladesh',
+    'Osmany International Airport',
+    'ZYL',
+  ),
+  DepartureAirport(
+    'Dhaka, Bangladesh',
+    'Hazrat Shahjalal International Airport',
+    'DAC',
+  ),
+  DepartureAirport(
+    'Coxs Bazar, Bangladesh',
+    'Cox'
+        's Bazar Airport',
+    'CXB',
+  ),
+  DepartureAirport('Barisal, Bangladesh', 'Barisal Airport', 'BZL'),
 ];
 
 List<ArrivalAirport> arrivalAirportItems = [
-  ArrivalAirport('','',''),
-  ArrivalAirport('Chittagong, Bangladesh','Shah Amanat International Airport','CGP'),
-  ArrivalAirport('Ishurdi Bangladesh','Ishurdi Airport','IRDF'),
-  ArrivalAirport('Jessor, Bangladesh','Jessor Airport','JSR'),
-  ArrivalAirport('Rajshahi, Bangladesh','Rajshahi, Bangladesh','RJH'),
-  ArrivalAirport('Saidpur, Bangladesh','Saidpur Airport','SPD'),
-  ArrivalAirport('Sylhet Osmani, Bangladesh','Osmany International Airport','ZYL'),
-  ArrivalAirport('Dhaka, Bangladesh','Hazrat Shahjalal International Airport','DAC'),  
-  ArrivalAirport('Coxs Bazar, Bangladesh','Cox''s Bazar Airport','CXB'),
-  ArrivalAirport('Barisal, Bangladesh','Barisal Airport','BZL')
+  ArrivalAirport('', '', ''),
+  ArrivalAirport(
+    'Chittagong, Bangladesh',
+    'Shah Amanat International Airport',
+    'CGP',
+  ),
+  ArrivalAirport('Ishurdi Bangladesh', 'Ishurdi Airport', 'IRDF'),
+  ArrivalAirport('Jessor, Bangladesh', 'Jessor Airport', 'JSR'),
+  ArrivalAirport('Rajshahi, Bangladesh', 'Rajshahi, Bangladesh', 'RJH'),
+  ArrivalAirport('Saidpur, Bangladesh', 'Saidpur Airport', 'SPD'),
+  ArrivalAirport(
+    'Sylhet Osmani, Bangladesh',
+    'Osmany International Airport',
+    'ZYL',
+  ),
+  ArrivalAirport(
+    'Dhaka, Bangladesh',
+    'Hazrat Shahjalal International Airport',
+    'DAC',
+  ),
+  ArrivalAirport(
+    'Coxs Bazar, Bangladesh',
+    'Cox'
+        's Bazar Airport',
+    'CXB',
+  ),
+  ArrivalAirport('Barisal, Bangladesh', 'Barisal Airport', 'BZL'),
 ];
 
 List<Airline> airlineItems = [
-  Airline('','',''),
-  Airline('Air Bangladesh','Bangladesh','B9'),
-  Airline('Biman Bangladesh Airlines','Bangladesh','BG'),
-  Airline('Bismillah Airlines','Bangladesh','5Z'),
-  Airline('United Airlines','Bangladesh','4H'),
-  Airline('Emirates','United Arab Emirates','EK')
+  Airline('', '', ''),
+  Airline('Air Bangladesh', 'Bangladesh', 'B9'),
+  Airline('Biman Bangladesh Airlines', 'Bangladesh', 'BG'),
+  Airline('Bismillah Airlines', 'Bangladesh', '5Z'),
+  Airline('United Airlines', 'Bangladesh', '4H'),
+  Airline('Emirates', 'United Arab Emirates', 'EK'),
 ];
 
 List<Classes> classItems = [
@@ -447,6 +522,6 @@ List<Classes> classItems = [
   Classes('Business'),
   Classes('first'),
   Classes('Premium Economy'),
-  Classes('Economy')
+  Classes('Economy'),
 ];
-
+}
