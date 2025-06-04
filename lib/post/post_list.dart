@@ -40,7 +40,12 @@ FocusScope.of(context).requestFocus(inputNode);
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
       appBar: AppBar(title: Text("Posts")),
-      body: Center(
+      body: loadPage()
+    );
+  }
+
+  Widget loadPage(){
+    return Center(
         child: isloaded
             ? ListView.builder(
                 itemCount: allPosts.length,
@@ -312,8 +317,8 @@ FocusScope.of(context).requestFocus(inputNode);
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Row(
-                                      children: [
-                                        Text(totalLike.toString() + " Like"),
+                                      children: [allPosts[index]["like"] == 0  || allPosts[index]["like"] == null
+                                        ? Text("0 Like"): Text(allPosts[index]["like"].toString() + " Like"),
                                         Padding(
                                           padding: const EdgeInsets.all(10),
                                           child: Text(
@@ -324,16 +329,15 @@ FocusScope.of(context).requestFocus(inputNode);
                                             ),
                                           ),
                                         ),
+                                        
                                         Padding(
                                           padding: const EdgeInsets.only(
                                             left: 5,
                                           ),
                                           child: GestureDetector(
                                             onTap: () {clickCommentIcon();},
-                                            child: Text(
-                                              totalComment.toString() +
-                                                  " Comment",
-                                            ),
+                                            child: allPosts[index]["Totalcomment"] == 0  || allPosts[index]["Totalcomment"] == null
+                                        ? Text("0 Comment"): Text(allPosts[index]["Totalcomment"].toString() + " Comment"),
                                           ),
                                         ),
                                       ],
@@ -351,7 +355,7 @@ FocusScope.of(context).requestFocus(inputNode);
                                       children: [
                                         IconButton(
                                           onPressed: ()async{clicklikeIcon(index+1);},
-                                          icon: likeButtonTaggle == false
+                                          icon: allPosts[index]["like"] == 0  || allPosts[index]["like"] == null
                                               ? Icon(
                                                   Icons
                                                       .thumb_up_off_alt_outlined,
@@ -379,7 +383,7 @@ FocusScope.of(context).requestFocus(inputNode);
                                 ),
                               ],
                             ),
-                            commentStr != '' ? Row(children: [
+                            allPosts[index]["comment"] != '' ? Row(children: [
                               Container(
                                 alignment: Alignment.topLeft,
                                 width: MediaQuery.of(context).size.width - 60,
@@ -406,7 +410,7 @@ FocusScope.of(context).requestFocus(inputNode);
                                                 bottom: 8,
                                               ),
                                               child: Text(
-                                                commentStr,
+                                                allPosts[index]["comment"],
                                                 softWrap: true,                                              
                                             ),
                                           ),
@@ -456,8 +460,7 @@ FocusScope.of(context).requestFocus(inputNode);
                 },
               )
             : getProgressBar(),
-      ),
-    );
+      );
   }
 
   getPostList() async {
@@ -477,8 +480,10 @@ FocusScope.of(context).requestFocus(inputNode);
     print(allPosts);
   }
 
-  Future<void> clicklikeIcon(int index) async {
-    setState(() {
+  Future<void> clicklikeIcon(int index) async {    
+collection.doc(index.toString()).update({'like' : totalLike});
+    setState(() {      
+      loadPage();
       if (!likeButtonTaggle) {
         likeButtonTaggle = true;
         totalLike = 1;
@@ -489,7 +494,6 @@ FocusScope.of(context).requestFocus(inputNode);
         totalLike = 0;
       }
     });    
-collection.doc(index.toString()).update({'like' : totalLike});
   }
   Future<void>clickCommentIcon() async {
     print('comment clicked');
@@ -505,7 +509,7 @@ collection.doc(index.toString()).update({'like' : totalLike});
   
 addComment(String comment,int index){
   if (comment != null || comment != '') {
-    collection.doc(index.toString()).update({'comment' : comment});
+    collection.doc(index.toString()).update({'comment' : comment,'Totalcomment' : 1});
    setState(() {
     commentStr = comment;
     _commentTextEditorController.text = '';
