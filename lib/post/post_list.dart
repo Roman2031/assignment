@@ -350,7 +350,7 @@ FocusScope.of(context).requestFocus(inputNode);
                                     child: Row(
                                       children: [
                                         IconButton(
-                                          onPressed: clicklikeIcon,
+                                          onPressed: ()async{clicklikeIcon(index+1);},
                                           icon: likeButtonTaggle == false
                                               ? Icon(
                                                   Icons
@@ -359,8 +359,8 @@ FocusScope.of(context).requestFocus(inputNode);
                                               : Icon(Icons.thumb_up_alt_sharp),
                                         ),
                                         GestureDetector(
-                                          onTap: () {
-                                            clicklikeIcon();
+                                          onTap: () async {
+                                            clicklikeIcon(index+1);
                                           },
                                           child: Text("Like"),
                                         ),
@@ -440,7 +440,7 @@ FocusScope.of(context).requestFocus(inputNode);
                 )),
                 Padding(padding: EdgeInsetsGeometry.all(8),
                 child: IconButton(onPressed: (){
-                 addComment(_commentTextEditorController.text,index);
+                 addComment(_commentTextEditorController.text,index+1);
                 }, icon: Icon(Icons.send_sharp),iconSize: 30))                                     
                                       ],
                                     ),
@@ -477,21 +477,21 @@ FocusScope.of(context).requestFocus(inputNode);
     print(allPosts);
   }
 
-  clicklikeIcon() async {
+  Future<void> clicklikeIcon(int index) async {
     setState(() {
       if (!likeButtonTaggle) {
         likeButtonTaggle = true;
         totalLike = 1;
-
         return;
       }
       if (likeButtonTaggle) {
         likeButtonTaggle = false;
         totalLike = 0;
       }
-    });
+    });    
+collection.doc(index.toString()).update({'like' : totalLike});
   }
-  clickCommentIcon() async {
+  Future<void>clickCommentIcon() async {
     print('comment clicked');
    openKeyboard();
   }
@@ -505,6 +505,7 @@ FocusScope.of(context).requestFocus(inputNode);
   
 addComment(String comment,int index){
   if (comment != null || comment != '') {
+    collection.doc(index.toString()).update({'comment' : comment});
    setState(() {
     commentStr = comment;
     _commentTextEditorController.text = '';
