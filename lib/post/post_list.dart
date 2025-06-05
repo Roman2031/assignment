@@ -578,7 +578,7 @@ FocusScope.of(context).requestFocus(inputNode);
   getPostList() async {
     late List<Map<String, dynamic>> tempList = [];
     // Get docs from collection reference
-    var data = await collection.orderBy("createdOn", descending: true).get();
+    var data = await collection.get();
 
     data.docs.forEach((element) {
       tempList.add(element.data());
