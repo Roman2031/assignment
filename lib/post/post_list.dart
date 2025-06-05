@@ -49,11 +49,11 @@ FocusScope.of(context).requestFocus(inputNode);
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text("Share List"),          
+          Text("List"),          
                             Padding(
                               padding: const EdgeInsets.only(left: 8),
                               child: CustomButton(
-                                            label: "Share",
+                                            label: "Share page",
                                             onPressed: () => goToShare(context),
                                           ),
                             ),
@@ -78,10 +78,10 @@ FocusScope.of(context).requestFocus(inputNode);
                             Row(
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.all(8.0),
+                                  padding: EdgeInsets.all(8.0),
                                   child: Container(
                                     child: Padding(
-                                      padding: const EdgeInsets.only(
+                                      padding: EdgeInsets.only(
                                         left: 5,
                                         right: 5,
                                         top: 8,
@@ -100,11 +100,7 @@ FocusScope.of(context).requestFocus(inputNode);
                                                 size: 50,
                                                 color: Colors.grey,
                                               ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                  left: 5,
-                                                ),
-                                                child: Column(
+                                              Column(
                                                   children: [
                                                     Text(
                                                       "Person " +
@@ -122,57 +118,26 @@ FocusScope.of(context).requestFocus(inputNode);
                                                         fontSize: 11,
                                                       ),
                                                     ),
+                                                        StarRating(
+                                                            size: 20.0,
+                                                            rating: double.parse(
+                                                              allPosts[index]["rating"],
+                                                            ),
+                                                            color: Colors.orange,
+                                                            borderColor:
+                                                                Colors.grey,
+                                                            allowHalfRating: false,
+                                                            starCount: starCount,
+                                                          ),                                                      
                                                   ],
                                                 ),
-                                              ),
                                             ],
                                           ),
-                                          Container(
-                                            padding: const EdgeInsets.only(
-                                              left: 80
-                                            ),
-                                            child: Column(
+                                          Column(
                                               children: [
-                                                //Icon(Icons.more_horiz_rounded,size: 30,color: Colors.black),
-                                                Container(
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      StarRating(
-                                                        size: 20.0,
-                                                        rating: double.parse(
-                                                          allPosts[index]["rating"],
-                                                        ),
-                                                        color: Colors.orange,
-                                                        borderColor:
-                                                            Colors.grey,
-                                                        allowHalfRating: false,
-                                                        starCount: starCount,
-                                                      ),
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets.only(
-                                                              left: 3,
-                                                            ),
-                                                        child: Text(
-                                                          allPosts[index]["rating"],
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            color: Colors.black,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
+                                                
                                               ],
                                             ),
-                                          ),
                                         ],
                                       ),
                                     ),
@@ -397,10 +362,12 @@ FocusScope.of(context).requestFocus(inputNode);
                                 ),
                               ],
                             ),
-                            allPosts[index]["comment"] != '' ? Row(children: [
+                            allPosts[index]["comment"] != '' ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
                               Container(
-                                alignment: Alignment.topLeft,
-                                width: MediaQuery.of(context).size.width - 60,
+                                width: MediaQuery.of(context).size.width-70,
                                  decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
                                   color: Colors.grey.shade200
@@ -507,13 +474,13 @@ FocusScope.of(context).requestFocus(inputNode);
                                             )
                                           ],):Container(),       
                                          replyButtonTaggle ? Row(children: [
-                                            Container(width: (MediaQuery.of(context).size.width - 180),height: 50, child: TextField(
+                                            Container(width: (MediaQuery.of(context).size.width - 180),height: 60, child: TextField(
                   controller: _replyTextEditorController,
                   keyboardType: TextInputType.multiline,
                   maxLines: 2,
                   decoration: InputDecoration(
                     filled: true,
-      fillColor: Colors.white,
+                    fillColor: Colors.white,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(30.0),),                    
                     hintText: 'Reply',
                     suffixIcon: IconButton(onPressed: (){addReply(_replyTextEditorController.text, index+1);}, icon: Icon(Icons.send))
@@ -538,21 +505,17 @@ FocusScope.of(context).requestFocus(inputNode);
                                           size: 50,
                                           color: Colors.grey,
                                         ),  
-                                        Container(width: (MediaQuery.of(context).size.width - 220),height: 50, child: TextField(
+                                        Container(width: 210,height: 60, child: TextField(
                   controller: _commentTextEditorController,
                   keyboardType: TextInputType.multiline,
                   maxLines: 2,
                   decoration: InputDecoration(
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(30.0),),                    
-                    hintText: 'Write your comment',
-                    hintStyle: TextStyle()
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(30.0)),                    
+                    hintText: 'Comment',
+                    hintStyle: TextStyle(),
+                    suffixIcon: IconButton(onPressed: (){addComment(_commentTextEditorController.text,index+1);}, icon: Icon(Icons.send))
                   )
-                )),
-                Padding(padding: EdgeInsetsGeometry.all(8),
-                child: IconButton(onPressed: (){
-                 addComment(_commentTextEditorController.text,index+1);
-                }, icon: Icon(Icons.send_sharp),iconSize: 30))                                     
-                                      ],
+                ))],
                                     ),
                                   ),
                                 ),

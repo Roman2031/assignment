@@ -57,15 +57,6 @@ class _LoginScreenState extends State<LoginScreen> {
               label: "Login",
               onPressed: _login,
             ),
-            const SizedBox(height: 10),
-            CustomButton(
-              label: "share",
-              onPressed: () => goToShare(context),
-            ),
-             CustomButton(
-              label: "share List",
-              onPressed: () => goToShareList(context),
-            ),
             Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               const Text("Already have an account? "),
               InkWell(
@@ -90,16 +81,6 @@ class _LoginScreenState extends State<LoginScreen> {
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
-
-   goToShare(BuildContext context) => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const ShareScreen()),
-      );    
-
-      goToShareList(BuildContext context) => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const PostListScreen()),
-      );  
 
   _login() async {
     final user =

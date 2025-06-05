@@ -1,3 +1,4 @@
+import 'package:assignment/post/post_list.dart';
 import 'package:assignment/post/share_screen.dart';
 import 'package:assignment/widgets/button.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +19,12 @@ class HomeScreen extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
             ),
             const SizedBox(height: 5),
-            CustomButton(onPressed: () => goToShare(context), label: "Share"),
+            CustomButton(onPressed: () => goToShare(context), label: "Share Page"),
+            const SizedBox(height: 5),
+            CustomButton(
+              label: "List Page",
+              onPressed: () => goToShareList(context),
+            ),
             ColoredBox(color: Colors.greenAccent),
           ],
         ),
@@ -30,4 +36,9 @@ class HomeScreen extends StatelessWidget {
     context,
     MaterialPageRoute(builder: (context) => const ShareScreen()),
   );
+
+  goToShareList(BuildContext context) => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const PostListScreen()),
+      );  
 }
