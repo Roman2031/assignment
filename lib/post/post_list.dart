@@ -15,6 +15,7 @@ class _PostListScreenState extends State<PostListScreen> {
   late List<Map<String, dynamic>> allPosts;
   bool isloaded = false;
   bool likeButtonTaggle = false;
+  bool voteButtonTaggle = false;
   String commentStr = '';
 
 
@@ -22,6 +23,7 @@ class _PostListScreenState extends State<PostListScreen> {
   int starCount = 5;
   int totalLike = 0;
   int totalComment = 0;
+  int totalVote = 0;
  final TextEditingController _commentTextEditorController = TextEditingController();
   FocusNode inputNode = FocusNode();
 // to open keyboard call this function;
@@ -388,9 +390,9 @@ FocusScope.of(context).requestFocus(inputNode);
                                 alignment: Alignment.topLeft,
                                 width: MediaQuery.of(context).size.width - 60,
                                  decoration: BoxDecoration(
-    borderRadius: BorderRadius.circular(20),
-    color: Colors.grey.shade200
-  ),
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: Colors.grey.shade200
+                                ),
                                 child: Flexible(
                                     child: Padding(
                                       padding: const EdgeInsets.all(8.0),
@@ -398,21 +400,65 @@ FocusScope.of(context).requestFocus(inputNode);
                                         mainAxisAlignment: MainAxisAlignment.start,
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Icon(
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: [
+                                            Row(
+                                                children: [
+                                                  Icon(
                                             Icons.account_circle_rounded,
                                             size: 50,
                                             color: Colors.grey,
-                                          ), Padding(
-                                              padding: const EdgeInsets.only(
-                                                left: 5,
-                                                right: 25,
-                                                top: 8,
-                                                bottom: 8,
-                                              ),
-                                              child: Text(
-                                                allPosts[index]["comment"],
-                                                softWrap: true,                                              
-                                            ),
+                                          ),
+                                                  Column(
+                                                    children: [
+                                                      Text(
+                                                    "Person " + (index + 1).toString(),style: TextStyle(fontWeight: FontWeight.bold,fontSize: 14),
+                                                    softWrap: true),
+                                                      Text(
+                                                      (index + 1).toString() +
+                                                          ' second ago',
+                                                      style: TextStyle(
+                                                        fontSize: 11,
+                                                      ),
+                                                    ),
+                                                    ],
+                                                  )
+                                                ],
+                                              ),    
+                                          allPosts[index]["totalUpvote"] == 0  || allPosts[index]["totalUpvote"] == null
+                                        ? Padding(
+                                          padding: EdgeInsets.only(right: 8),
+                                          child: Text("0 Upvote"),
+                                        ): Padding(
+                                          padding: const EdgeInsets.only(right: 8),
+                                          child: Text(allPosts[index]["totalUpvote"].toString() + " Upvote"),
+                                        ),
+                                          ]),
+                                          Row(children: [
+                                            Text(allPosts[index]["comment"],softWrap: true)
+                                          ],),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                      children: [
+                                                          IconButton(onPressed:(){
+                                                            clickUpvotedIcon(index+1);
+                                                          },icon: Icon(Icons.keyboard_double_arrow_up_outlined,color: Colors.black)),
+                                                          GestureDetector(onTap: (){clickUpvotedIcon(index+1);},child: Text("Upvote"))
+                                                      ]
+                                                  ),
+                                                  Padding(padding: EdgeInsetsGeometry.only(right: 10)),
+                                                Row(
+                                                      children: [
+                                                          IconButton(onPressed:(){},icon: Icon(Icons.reply,color: Colors.black)),
+                                                          Text("Reply"), 
+                                                      ]
+                                                  ),
+                                            ],
                                           ),
                                         ],
                                       ),
@@ -481,9 +527,7 @@ FocusScope.of(context).requestFocus(inputNode);
   }
 
   Future<void> clicklikeIcon(int index) async {    
-collection.doc(index.toString()).update({'like' : totalLike});
-    setState(() {      
-      loadPage();
+    setState(() {  
       if (!likeButtonTaggle) {
         likeButtonTaggle = true;
         totalLike = 1;
@@ -492,12 +536,30 @@ collection.doc(index.toString()).update({'like' : totalLike});
       if (likeButtonTaggle) {
         likeButtonTaggle = false;
         totalLike = 0;
-      }
-    });    
+      }          
+      loadPage();
+    });        
+collection.doc(index.toString()).update({'like' : totalLike});
   }
   Future<void>clickCommentIcon() async {
     print('comment clicked');
    openKeyboard();
+  }
+
+  Future<void>clickUpvotedIcon(int index) async {
+    setState(() {
+      if (!voteButtonTaggle) {
+        voteButtonTaggle = true;
+        totalVote = 1;
+        return;
+      }
+      if (voteButtonTaggle) {
+        voteButtonTaggle = false;
+        totalVote = 0;
+      }
+    });
+   collection.doc(index.toString()).update({'totalUpvote' : totalVote});   
+    print("total Vote: "+ totalVote.toString());
   }
 
   clickshareIcon() async {
@@ -509,12 +571,12 @@ collection.doc(index.toString()).update({'like' : totalLike});
   
 addComment(String comment,int index){
   if (comment != null || comment != '') {
-    collection.doc(index.toString()).update({'comment' : comment,'Totalcomment' : 1});
    setState(() {
     commentStr = comment;
     _commentTextEditorController.text = '';
     print('index: '+ index.toString());
-  }); 
+  });   
+    collection.doc(index.toString()).update({'comment' : comment,'Totalcomment' : 1});
   }  
 }
 }
