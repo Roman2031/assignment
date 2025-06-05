@@ -1,3 +1,5 @@
+import 'package:assignment/post/share_screen.dart';
+import 'package:assignment/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -42,12 +44,7 @@ FocusScope.of(context).requestFocus(inputNode);
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
       appBar: AppBar(title: Text("Posts")),
-      body: loadPage()
-    );
-  }
-
-  Widget loadPage(){
-    return Center(
+      body: Center(
         child: isloaded
             ? ListView.builder(
                 itemCount: allPosts.length,
@@ -63,6 +60,10 @@ FocusScope.of(context).requestFocus(inputNode);
                       title: Container(
                         child: Column(
                           children: [
+                            CustomButton(
+              label: "share",
+              onPressed: () => goToShare(context),
+            ),
                             Row(
                               children: [
                                 Padding(
@@ -455,7 +456,7 @@ FocusScope.of(context).requestFocus(inputNode);
                                                 Row(
                                                       children: [
                                                           IconButton(onPressed:(){},icon: Icon(Icons.reply,color: Colors.black)),
-                                                          Text("Reply"), 
+                                                          GestureDetector(onTap: (){},child: Text("Reply")), 
                                                       ]
                                                   ),
                                             ],
@@ -506,8 +507,14 @@ FocusScope.of(context).requestFocus(inputNode);
                 },
               )
             : getProgressBar(),
-      );
+      )
+    );
   }
+
+    goToShare(BuildContext context) => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const ShareScreen()),
+      ); 
 
   getPostList() async {
     late List<Map<String, dynamic>> tempList = [];
@@ -536,14 +543,15 @@ FocusScope.of(context).requestFocus(inputNode);
       if (likeButtonTaggle) {
         likeButtonTaggle = false;
         totalLike = 0;
-      }          
-      loadPage();
-    });        
-collection.doc(index.toString()).update({'like' : totalLike});
+      }     
+    });      
+collection.doc(index.toString()).update({'like' : totalLike});      
+setState(() {
+  getPostList();
+});       
   }
   Future<void>clickCommentIcon() async {
     print('comment clicked');
-   openKeyboard();
   }
 
   Future<void>clickUpvotedIcon(int index) async {
@@ -558,7 +566,10 @@ collection.doc(index.toString()).update({'like' : totalLike});
         totalVote = 0;
       }
     });
-   collection.doc(index.toString()).update({'totalUpvote' : totalVote});   
+   collection.doc(index.toString()).update({'totalUpvote' : totalVote});  
+    setState(() {
+      getPostList();
+    });
     print("total Vote: "+ totalVote.toString());
   }
 
@@ -576,8 +587,11 @@ addComment(String comment,int index){
     _commentTextEditorController.text = '';
     print('index: '+ index.toString());
   });   
-    collection.doc(index.toString()).update({'comment' : comment,'Totalcomment' : 1});
+    collection.doc(index.toString()).update({'comment' : comment,'Totalcomment' : 1});    
   }  
+  setState(() {
+      getPostList();
+    });
 }
 }
 

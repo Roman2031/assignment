@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:assignment/post/post_list.dart';
+import 'package:assignment/widgets/button.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -51,6 +53,13 @@ class _ShareScreenState extends State<ShareScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: CustomButton(
+                label: "share List",
+                onPressed: () => goToShareList(context),
+                            ),
+              ),
               SizedBox(height: 5),
               InkWell(
                 onTap: () {
@@ -353,6 +362,13 @@ class _ShareScreenState extends State<ShareScreen> {
   List<String> downloadUrls = [];
 
   final ImagePicker _picker = ImagePicker();
+
+  
+
+    goToShareList(BuildContext context) => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const PostListScreen()),
+      );  
 
   getMultipImage() async {
     final List<XFile>? pickedImages = await _picker.pickMultiImage();
