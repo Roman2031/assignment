@@ -18,8 +18,9 @@ class _PostListScreenState extends State<PostListScreen> {
   bool isloaded = false;
   bool likeButtonTaggle = false;
   bool voteButtonTaggle = false;
+  bool replyButtonTaggle = false;
   String commentStr = '';
-
+  String replyStr = '';
 
   double rating = 0;
   int starCount = 5;
@@ -27,6 +28,7 @@ class _PostListScreenState extends State<PostListScreen> {
   int totalComment = 0;
   int totalVote = 0;
  final TextEditingController _commentTextEditorController = TextEditingController();
+ final TextEditingController _replyTextEditorController = TextEditingController();
   FocusNode inputNode = FocusNode();
 // to open keyboard call this function;
 void openKeyboard(){
@@ -43,7 +45,20 @@ FocusScope.of(context).requestFocus(inputNode);
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
-      appBar: AppBar(title: Text("Posts")),
+      appBar: AppBar(title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text("Share List"),          
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: CustomButton(
+                                            label: "Share",
+                                            onPressed: () => goToShare(context),
+                                          ),
+                            ),
+        ],
+      )),
       body: Center(
         child: isloaded
             ? ListView.builder(
@@ -60,10 +75,6 @@ FocusScope.of(context).requestFocus(inputNode);
                       title: Container(
                         child: Column(
                           children: [
-                            CustomButton(
-              label: "share",
-              onPressed: () => goToShare(context),
-            ),
                             Row(
                               children: [
                                 Padding(
@@ -339,7 +350,7 @@ FocusScope.of(context).requestFocus(inputNode);
                                           ),
                                           child: GestureDetector(
                                             onTap: () {clickCommentIcon();},
-                                            child: allPosts[index]["Totalcomment"] == 0  || allPosts[index]["Totalcomment"] == null
+                                            child: allPosts[index]["Totalcomment"] == 0
                                         ? Text("0 Comment"): Text(allPosts[index]["Totalcomment"].toString() + " Comment"),
                                           ),
                                         ),
@@ -441,8 +452,6 @@ FocusScope.of(context).requestFocus(inputNode);
                                             Text(allPosts[index]["comment"],softWrap: true)
                                           ],),
                                           Row(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               Row(
                                                       children: [
@@ -455,12 +464,62 @@ FocusScope.of(context).requestFocus(inputNode);
                                                   Padding(padding: EdgeInsetsGeometry.only(right: 10)),
                                                 Row(
                                                       children: [
-                                                          IconButton(onPressed:(){},icon: Icon(Icons.reply,color: Colors.black)),
-                                                          GestureDetector(onTap: (){},child: Text("Reply")), 
+                                                          IconButton(onPressed:(){showReplyButton();},icon: Icon(Icons.reply,color: Colors.black)),
+                                                          GestureDetector(onTap: (){showReplyButton();},child: Text("Reply")), 
                                                       ]
                                                   ),
+                                                  Padding(padding: EdgeInsetsGeometry.all(8)),
                                             ],
-                                          ),
+                                          ),    
+                                                allPosts[index]["reply"] != '' ?  Container(                                                  
+                                                  child: Row(
+                                                  children: [
+                                                    Padding(padding: EdgeInsetsGeometry.only(left: 15)),
+                                                    Icon(
+                                                                                              Icons.account_circle_rounded,
+                                                                                              size: 50,
+                                                                                              color: Colors.grey,
+                                                                                            ),
+                                                    Row(
+                                                      children: [
+                                                        Column(
+                                                          children: [
+                                                            Text(
+                                                          "Person " + (index + 1).toString(),style: TextStyle(fontWeight: FontWeight.bold,fontSize: 14),
+                                                          softWrap: true),
+                                                            Text(
+                                                            (index + 1).toString() +
+                                                                ' second ago',
+                                                            style: TextStyle(
+                                                              fontSize: 11,
+                                                            ),
+                                                          ),
+                                                          ],
+                                                        ),  
+                                                      ],
+                                                    ),   ],
+                                                                                                ),
+                                                ): Container(),  
+                                                 allPosts[index]["reply"] != ' ' ?  Row(children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(left:20),
+                                              child: Text(allPosts[index]["reply"], softWrap: true),
+                                            )
+                                          ],):Container(),       
+                                         replyButtonTaggle ? Row(children: [
+                                            Container(width: (MediaQuery.of(context).size.width - 180),height: 50, child: TextField(
+                  controller: _replyTextEditorController,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: 2,
+                  decoration: InputDecoration(
+                    filled: true,
+      fillColor: Colors.white,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(30.0),),                    
+                    hintText: 'Reply',
+                    suffixIcon: IconButton(onPressed: (){addReply(_replyTextEditorController.text, index+1);}, icon: Icon(Icons.send))
+                  )
+                )),
+                                          ],):  Container()
                                         ],
                                       ),
                                     ),
@@ -519,7 +578,7 @@ FocusScope.of(context).requestFocus(inputNode);
   getPostList() async {
     late List<Map<String, dynamic>> tempList = [];
     // Get docs from collection reference
-    var data = await collection.get();
+    var data = await collection.orderBy("createdOn", descending: true).get();
 
     data.docs.forEach((element) {
       tempList.add(element.data());
@@ -529,7 +588,6 @@ FocusScope.of(context).requestFocus(inputNode);
       allPosts = tempList;
       isloaded = true;
     });
-
     print(allPosts);
   }
 
@@ -592,6 +650,27 @@ addComment(String comment,int index){
   setState(() {
       getPostList();
     });
+}
+
+showReplyButton(){
+setState(() {
+  replyButtonTaggle ? replyButtonTaggle = false : replyButtonTaggle = true;
+});
+}
+
+addReply(String reply, int index){
+  if (reply != null || reply != '') {
+   setState(() {
+    replyStr = reply;
+    _replyTextEditorController.text = '';
+    print('index: '+ index.toString());
+  });   
+    collection.doc(index.toString()).update({'reply' : reply});    
+  }  
+  setState(() {
+      getPostList();
+    });
+    showReplyButton();
 }
 }
 

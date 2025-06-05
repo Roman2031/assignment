@@ -47,19 +47,25 @@ class _ShareScreenState extends State<ShareScreen> {
       text: _selected == null ? '' : DateFormat().add_yM().format(_selected!),
     );
     return Scaffold(
-      appBar: AppBar(title: Text("Upload multiple files")),
+      appBar: AppBar(title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text("Share"),
+          Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: CustomButton(
+                label: "Share List",
+                onPressed: () => goToShareList(context),
+                            ),
+              ),
+        ],
+      )),
       body: Container(
         width: double.infinity,
         child: SingleChildScrollView(
           child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: CustomButton(
-                label: "share List",
-                onPressed: () => goToShareList(context),
-                            ),
-              ),
+            children: [              
               SizedBox(height: 5),
               InkWell(
                 onTap: () {
@@ -249,8 +255,7 @@ class _ShareScreenState extends State<ShareScreen> {
                   },
                 ).toList(),
               ),
-              const SizedBox(height: 10),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
               Container(
                 width: width,
                 child: TextField(
@@ -443,6 +448,7 @@ print('document id '+ documentId);
   FirebaseFirestore.instance
       .collection('post').doc(documentId)
       .set({
+        'createdOn': DateTime.now(),
         'image': imageUrls,
         'post': postText,
         'departureAirportName': departureAirportName,
@@ -457,6 +463,10 @@ print('document id '+ documentId);
         'className': className,
         'travelDate': travelDate,
         'rating': rating,
+        'totalUpvote': 0,
+        'comment': '',
+        'Totalcomment': 0,
+        'reply': '',
       })
       .then((value) {
         Get.snackbar('Success', 'Data is stored successfully');
